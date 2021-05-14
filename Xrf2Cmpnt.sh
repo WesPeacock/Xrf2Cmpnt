@@ -38,5 +38,5 @@ rm $fwdatafile $barefname-before.fwdata
 echo "Work files \"$fwdatafile\" & \"$barefname-before.fwdata\" have been deleted"
 mv Xrf2Cmpnt.bak Xrf2Cmpnt.ini
 echo
-echo "The file \"$fwdatafile\" inside \"$backupfile\" has had some crossreferences changed to Components. See the log file."
+echo "The file \"$fwdatafile\" inside \"$backupfile\" has had some Components generated from Cross references. See the log file."
 
