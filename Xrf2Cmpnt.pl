@@ -75,9 +75,6 @@ if (!$cmpntxrfrt) {
 my $scmpxr = $cmpntxrfrt->serialize();
 say STDERR $scmpxr  if $debug;
 
-# header of log file
-say LOGFILE '<?xml version="1.0" encoding="UTF-8" ?>';
-say LOGFILE '<pairs>';
 
 
 my $mbrcnt=0;
@@ -85,7 +82,7 @@ my $mbrtotal=0;
 foreach my $mbr ($cmpntxrfrt->findnodes('./Members/objsur')) {
 	$mbrtotal++;
 	my $mbrguid = $mbr->getAttribute('guid');
-	say "mbrguid:$mbrguid";
+	say STDERR "mbrguid:$mbrguid" if $debug;
 	my $lxrefrt = $rthash{$mbrguid};
 	# say $lxrefrt;
 	my @targets = $lxrefrt->findnodes('./Targets/objsur');
@@ -93,15 +90,19 @@ foreach my $mbr ($cmpntxrfrt->findnodes('./Members/objsur')) {
 
 	my $cmpntnode=$targets[1]; # clone this node into the LexentryRef structure
 	my $cmpntguid = $cmpntnode->getAttribute('guid');
-	say "	Target[1] Component class guid:", $rthash{$cmpntguid}->getAttribute('class')," ", $cmpntguid;
-	say "	Target[1] Component head:", displaylexentstring(traverseuptoclass($rthash{$cmpntguid}, "LexEntry"));
-	say "";
+#	say STDERR "	Target[1] Component class guid:", $rthash{$cmpntguid}->getAttribute('class')," ", $cmpntguid if $debug;
+#	say STDERR "	Target[1] Component head:", displaylexentstring(traverseuptoclass($rthash{$cmpntguid}, "LexEntry")) if $debug;
+#	say STDERR "" if $debug;
 
 	my $cmplxguid = $targets[0]->getAttribute('guid');
-	say "	Target[0] Complex class guid: ", $rthash{$cmplxguid}->getAttribute('class')," ", $cmplxguid;
+	say STDERR  "	Target[0] Complex class guid: ", $rthash{$cmplxguid}->getAttribute('class')," ", $cmplxguid if $debug;
 	my $headrt = traverseuptoclass($rthash{$cmplxguid}, "LexEntry");
-	say "	Target[0] Complex head:", displaylexentstring($headrt);
+	say STDERR  "	Target[0] Complex head:", displaylexentstring($headrt) if $debug;
 	my ($entryref) = $headrt->findnodes('./EntryRefs/objsur');
+	if (! $entryref ) {
+		say LOGFILE "Complex entry has no pre-existing Components:", displaylexentstring($headrt);
+		next;
+		}
 	my $entryrefrt=$rthash{$entryref->getAttribute('guid')};
 	my ($cmpntlexemesnode) = $entryrefrt->findnodes('./ComponentLexemes');
 	if ($cmpntlexemesnode->findnodes(q#'./objsur[@guid="# . $cmpntguid . q#]'#) ) {
