@@ -39,8 +39,7 @@ die "Couldn't find the INI file:$configfile\nQuitting" if !$config;
 my $infilename = $config->{$inisection}->{FwdataIn};
 my $outfilename = $config->{$inisection}->{FwdataOut};
 my $logfilename = $config->{$inisection}->{LogFile};
-my $xrefAbbrev = $config->{$inisection}->{xrefAbbrev};
-
+my @xrfabrv = reverse sort split(/\ *,\ */, $config->{$inisection}->{xrefAbbrevs});
 my $lockfile = $infilename . '.lock' ;
 die "A lockfile exists: $lockfile\
 Don't run $0 when FW is running.\
@@ -66,20 +65,29 @@ foreach my $rt ($fwdatatree->findnodes(q#//rt#)) {
 	my $guid = $rt->getAttribute('guid');
 	$rthash{$guid} = $rt;
 	}
-
-my ($cmpntxrfrt) = $fwdatatree->findnodes(q#//AUni[text()='# . $xrefAbbrev . q#']/ancestor::rt[@class='LexRefType']#);
-if (!$cmpntxrfrt) {
-	say LOGFILE q#<!--  No Crossreferences found -->#, "\n\n" ;
-	die qq#No Crossreferences of type $xrefAbbrev found in the FLEx database#, "\n\n" ;
+my @mbrs;
+for my $xrefAbbrev (@xrfabrv) {
+	say STDERR $xrefAbbrev if $debug;
+	my ($cmpntxrfrt) = $fwdatatree->findnodes(q#//AUni[text()='# . $xrefAbbrev . q#']/ancestor::rt[@class='LexRefType']#);
+	if (!$cmpntxrfrt) {
+		say LOGFILE q#<!--  No Crossreferences found -->#, "\n\n" ;
+		die qq#No Crossreference Type with the abbreviation $xrefAbbrev found in the FLEx database#, "\n\n" ;
+		}
+	my $scmpxr = $cmpntxrfrt->serialize();
+	say STDERR $scmpxr  if $debug;
+	push (@mbrs, $cmpntxrfrt->findnodes('./Members/objsur'));
 	}
-my $scmpxr = $cmpntxrfrt->serialize();
-say STDERR $scmpxr  if $debug;
-
-
+if ($debug) {
+	for my $mbr (@mbrs) {
+		say STDERR "scmpxr:";
+		my $scmpxr = $mbr->serialize();
+		say STDERR $scmpxr;
+		}
+	}
 
 my $mbrcnt=0;
 my $mbrtotal=0;
-foreach my $mbr ($cmpntxrfrt->findnodes('./Members/objsur')) {
+foreach my $mbr (@mbrs) {
 	$mbrtotal++;
 	my $mbrguid = $mbr->getAttribute('guid');
 	say STDERR "mbrguid:$mbrguid" if $debug;
