@@ -39,7 +39,7 @@ die "Couldn't find the INI file:$configfile\nQuitting" if !$config;
 my $infilename = $config->{$inisection}->{FwdataIn};
 my $outfilename = $config->{$inisection}->{FwdataOut};
 my $logfilename = $config->{$inisection}->{LogFile};
-my @xrfabrv = reverse sort split(/\ *,\ */, $config->{$inisection}->{xrefAbbrevs});
+my @xrfabrv = split(/\ *,\ */, $config->{$inisection}->{xrefAbbrevs});
 my $lockfile = $infilename . '.lock' ;
 die "A lockfile exists: $lockfile\
 Don't run $0 when FW is running.\
