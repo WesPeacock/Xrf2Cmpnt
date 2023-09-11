@@ -142,7 +142,6 @@ say LOGFILE q#<!--  DON'T EDIT ANYTHING BELOW THIS LINE -->#;
 say LOGFILE '</pairs>';
 
 say STDERR "Found $mbrcnt of $mbrtotal";
-die;
 my $xmlstring = $fwdatatree->toString;
 # Some miscellaneous Tidying differences
 $xmlstring =~ s#><#>\n<#g;
