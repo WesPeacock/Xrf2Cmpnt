@@ -112,6 +112,8 @@ foreach my $mbr (@mbrs) {
 		next;
 		}
 	my $entryrefrt=$rthash{$entryref->getAttribute('guid')};
+	say STDERR "Before:" if $debug;
+	say STDERR $entryrefrt if $debug;
 	my ($cmpntlexemesnode) = $entryrefrt->findnodes('./ComponentLexemes');
 	if ($cmpntlexemesnode->findnodes(q#'./objsur[@guid="# . $cmpntguid . q#]'#) ) {
 		say LOGFILE "<!--  Component guid $cmpntguid  already in Components list under" .
@@ -120,14 +122,14 @@ foreach my $mbr (@mbrs) {
 		}
 	my $newnode = $cmpntnode->cloneNode(1);
 	$cmpntlexemesnode->addChild($newnode);
-	say "ComponentLexemes:", $cmpntlexemesnode; # add the component lexeme as a child node to this one.
+	say STDERR  "ComponentLexemes:", $cmpntlexemesnode if $debug; # add the component lexeme as a child node to this one.
 	my ($formsinnode) = $entryrefrt->findnodes('./ShowComplexFormsIn');
-	say "ShowComplexFormsIn", $formsinnode; # add the component lexeme as a child node to this one.
+	say STDERR "ShowComplexFormsIn", $formsinnode if $debug; # add the component lexeme as a child node to this one.
 	$newnode = $cmpntnode->cloneNode(1);
 	$formsinnode->addChild($newnode);
-	say "After:";
-	say $entryrefrt;
-	say "";
+	say STDERR "After:" if $debug;
+	say STDERR $entryrefrt if $debug;
+	say STDERR "" if $debug;
 
 	say LOGFILE q#<pair guid="#, $mbr->getAttribute('guid'), q#" entry1id=#;
 
