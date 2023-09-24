@@ -148,7 +148,3 @@ When a component is added it is assumed that it show all the complex forms that 
 This document is written in Markdown format. It's hosted on *github.com*. The github site that it's hosted on will display it in a formatted version.
 
 If you're looking at it another way and you're seeing unformatted text, there are good Markdown editors available for a Windows and Linux. An free on-line editor is available at https://stackedit.io/ 
-
-This README was copied from the Gnr2SgPl README and may not have all the extraneous details corrected.
-
-This repository was initialized with files from the Daasanach Gnr2SgPl repo.
