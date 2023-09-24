@@ -73,28 +73,26 @@ for my $xrefAbbrev (@xrfabrv) {
 		say LOGFILE q#<!--  No Crossreferences found -->#, "\n\n" ;
 		die qq#No Crossreference Type with the abbreviation $xrefAbbrev found in the FLEx database#, "\n\n" ;
 		}
-	my $scmpxr = $cmpntxrfrt->serialize();
-	say STDERR $scmpxr  if $debug;
-	push (@mbrs, $cmpntxrfrt->findnodes('./Members/objsur'));
-	}
-if ($debug) {
-	for my $mbr (@mbrs) {
-		say STDERR "scmpxr:";
-		my $scmpxr = $mbr->serialize();
-		say STDERR $scmpxr;
+	foreach my $xrmbrrt ($cmpntxrfrt->findnodes('./Members/objsur')) {
+		my $xrmbrguid = $xrmbrrt->getAttribute('guid');
+		push (@mbrs, "$xrefAbbrev\t$xrmbrguid");
 		}
 	}
+print Dumper @mbrs if $debug;
 
 my $mbrcnt=0;
 my $mbrtotal=0;
 foreach my $mbr (@mbrs) {
 	$mbrtotal++;
-	my $mbrguid = $mbr->getAttribute('guid');
+	my ($mbrabbrev, $mbrguid) = split("\t", $mbr);
+	say STDERR "mbrabbrev:$mbrabbrev" if $debug;
 	say STDERR "mbrguid:$mbrguid" if $debug;
 	my $lxrefrt = $rthash{$mbrguid};
-	# say $lxrefrt;
 	my @targets = $lxrefrt->findnodes('./Targets/objsur');
-	next if (scalar ( @targets ) != 2); #only pairs not collections
+	if (scalar ( @targets ) != 2) { #only pairs not collections
+		say LOGFILE "Error:Xref not a pair";		
+		next;
+		};
 
 	my $cmpntnode=$targets[1]; # clone this node into the LexentryRef structure
 	my $cmpntguid = $cmpntnode->getAttribute('guid');
