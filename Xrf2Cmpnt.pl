@@ -31,7 +31,7 @@ use Config::Tiny;
  # FwdataIn=FwProject-before.fwdata
  # FwdataOut=FwProject.fwdata
  # xrefAbbrev=Cmpnt
- # LogFile=Xrf2Cmpnt.log
+ # LogFile=Xrf2Cmpnt-log.txt
 
 my $config = Config::Tiny->read($configfile, 'crlf');
 
