@@ -39,7 +39,7 @@ die "Couldn't find the INI file:$configfile\nQuitting" if !$config;
 my $infilename = $config->{$inisection}->{FwdataIn};
 my $outfilename = $config->{$inisection}->{FwdataOut};
 my $logfilename = $config->{$inisection}->{LogFile};
-my @xrfabrv = split(/\ *,\ */, $config->{$inisection}->{xrefAbbrevs});
+my @xrfabrv = split(/\ *,\ */, $config->{$inisection}->{xrefAbbrev});
 my $lockfile = $infilename . '.lock' ;
 die "A lockfile exists: $lockfile\
 Don't run $0 when FW is running.\
@@ -67,7 +67,7 @@ foreach my $rt ($fwdatatree->findnodes(q#//rt#)) {
 	}
 my @mbrs;
 for my $xrefAbbrev (@xrfabrv) {
-	say STDERR $xrefAbbrev if $debug;
+	say STDERR "Xref:$xrefAbbrev" if $debug;
 	my ($cmpntxrfrt) = $fwdatatree->findnodes(q#//AUni[text()='# . $xrefAbbrev . q#']/ancestor::rt[@class='LexRefType']#);
 	if (!$cmpntxrfrt) {
 		say LOGFILE q#<!--  No Crossreferences found -->#, "\n\n" ;
