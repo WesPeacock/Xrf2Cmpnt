@@ -30,7 +30,7 @@ use Config::Tiny;
  # [Xrf2Cmpnt]
  # FwdataIn=FwProject-before.fwdata
  # FwdataOut=FwProject.fwdata
- # xrefAbbrev=Cmpnt
+ # xrefAbbrev=EC-2,SC-1-2,SC-2-2,SC-3-2, SC-4-2,EC-3,SC-1-3,SC-2-3,EC-4
  # LogFile=Xrf2Cmpnt-log.txt
 
 my $config = Config::Tiny->read($configfile, 'crlf');
@@ -89,18 +89,38 @@ foreach my $mbr (@mbrs) {
 	say STDERR "mbrguid:$mbrguid" if $debug;
 	my $lxrefrt = $rthash{$mbrguid};
 	my @targets = $lxrefrt->findnodes('./Targets/objsur');
+	# $target[0] points to the complex form
+	# $target[1] point to the component/main form
+	my $cmplxguid = $targets[0]->getAttribute('guid');
+	my $cmpntnode=$targets[1];
+	my $cmpntguid = $cmpntnode->getAttribute('guid');
 	if (scalar ( @targets ) != 2) { #only pairs not collections
 		say LOGFILE "Error:Xref not a pair";		
 		next;
 		};
-
-	my $cmpntnode=$targets[1]; # clone this node into the LexentryRef structure
-	my $cmpntguid = $cmpntnode->getAttribute('guid');
+	my $MainLexrt = $rthash{$cmpntguid};
+	if ($MainLexrt->getAttribute('class') ne 'LexEntry') {
+		say LOGFILE "Error: Ignoring entry because component was not at the Entry level" ;
+		say LOGFILE "Found ", $MainLexrt->getAttribute('class');
+		next;
+		}
+	if ($mbrabbrev =~ m/.*\-([0-9]+)\-[0-9]/) {
+	# abbreviation contains a sense number
+	# use the sense node from the senses list from the component
+	# rather than the entry node from the targets list
+		my $senseno = $1;
+		my @senses = $MainLexrt->findnodes('./Senses/objsur');
+		my $sensecount = scalar @senses;
+		if ($sensecount < $senseno) {
+			say LOGFILE "Error: Ignoring Subentry because main entry has only $sensecount senses" ;
+			next;
+			}
+		$cmpntnode=$senses[$senseno-1];
+		}
 #	say STDERR "	Target[1] Component class guid:", $rthash{$cmpntguid}->getAttribute('class')," ", $cmpntguid if $debug;
 #	say STDERR "	Target[1] Component head:", displaylexentstring(traverseuptoclass($rthash{$cmpntguid}, "LexEntry")) if $debug;
 #	say STDERR "" if $debug;
 
-	my $cmplxguid = $targets[0]->getAttribute('guid');
 	say STDERR  "	Target[0] Complex class guid: ", $rthash{$cmplxguid}->getAttribute('class')," ", $cmplxguid if $debug;
 	my $headrt = traverseuptoclass($rthash{$cmplxguid}, "LexEntry");
 	say STDERR  "	Target[0] Complex head:", displaylexentstring($headrt) if $debug;
