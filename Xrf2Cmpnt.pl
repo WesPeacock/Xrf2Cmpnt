@@ -70,21 +70,22 @@ for my $xrefAbbrev (@xrfabrv) {
 	say STDERR "Xref:$xrefAbbrev" if $debug;
 	my ($cmpntxrfrt) = $fwdatatree->findnodes(q#//AUni[text()='# . $xrefAbbrev . q#']/ancestor::rt[@class='LexRefType']#);
 	if (!$cmpntxrfrt) {
-		say LOGFILE q#<!--  No Crossreferences found -->#, "\n\n" ;
-		die qq#No Crossreference Type with the abbreviation $xrefAbbrev found in the FLEx database#, "\n\n" ;
+		say LOGFILE qq#Error: No Crossreferences with the abbreviation $xrefAbbrev found#, "\n\n" ;
+		die qq#No Crossreference Type found in the FLEx database#, "\n\n" ;
 		}
 	foreach my $xrmbrrt ($cmpntxrfrt->findnodes('./Members/objsur')) {
 		my $xrmbrguid = $xrmbrrt->getAttribute('guid');
 		push (@mbrs, "$xrefAbbrev\t$xrmbrguid");
 		}
 	}
-print Dumper @mbrs if $debug;
+print STDERR Dumper @mbrs if $debug;
 
 my $mbrcnt=0;
 my $mbrtotal=0;
 foreach my $mbr (@mbrs) {
 	$mbrtotal++;
 	my ($mbrabbrev, $mbrguid) = split("\t", $mbr);
+	say STDERR "mbr#:$mbrtotal" if $debug;
 	say STDERR "mbrabbrev:$mbrabbrev" if $debug;
 	say STDERR "mbrguid:$mbrguid" if $debug;
 	my $lxrefrt = $rthash{$mbrguid};
@@ -95,7 +96,8 @@ foreach my $mbr (@mbrs) {
 	my $cmpntnode=$targets[1];
 	my $cmpntguid = $cmpntnode->getAttribute('guid');
 	if (scalar ( @targets ) != 2) { #only pairs not collections
-		say LOGFILE "Error:Xref not a pair";		
+		say LOGFILE "Error:Xref not a pair; Ignoring Xref $mbrabbrev within entry";
+		say LOGFILE displaylexentstring ($rthash{$cmplxguid});
 		next;
 		};
 	my $MainLexrt = $rthash{$cmpntguid};
@@ -109,6 +111,7 @@ foreach my $mbr (@mbrs) {
 	# use the sense node from the senses list from the component
 	# rather than the entry node from the targets list
 		my $senseno = $1;
+		say LOGFILE "Looking for $senseno sense of " . displaylexentstring($MainLexrt);
 		my @senses = $MainLexrt->findnodes('./Senses/objsur');
 		my $sensecount = scalar @senses;
 		if ($sensecount < $senseno) {
@@ -117,25 +120,28 @@ foreach my $mbr (@mbrs) {
 			}
 		$cmpntnode=$senses[$senseno-1];
 		}
-#	say STDERR "	Target[1] Component class guid:", $rthash{$cmpntguid}->getAttribute('class')," ", $cmpntguid if $debug;
-#	say STDERR "	Target[1] Component head:", displaylexentstring(traverseuptoclass($rthash{$cmpntguid}, "LexEntry")) if $debug;
-#	say STDERR "" if $debug;
+	say STDERR "	Target[1] Component class guid:", $rthash{$cmpntguid}->getAttribute('class')," ", $cmpntguid if $debug;
+	say STDERR "	Target[1] Component head:", displaylexentstring(traverseuptoclass($rthash{$cmpntguid}, "LexEntry")) if $debug;
+	say STDERR "" if $debug;
 
 	say STDERR  "	Target[0] Complex class guid: ", $rthash{$cmplxguid}->getAttribute('class')," ", $cmplxguid if $debug;
 	my $headrt = traverseuptoclass($rthash{$cmplxguid}, "LexEntry");
 	say STDERR  "	Target[0] Complex head:", displaylexentstring($headrt) if $debug;
 	my ($entryref) = $headrt->findnodes('./EntryRefs/objsur');
 	if (! $entryref ) {
-		say LOGFILE "Complex entry has no pre-existing Components:", displaylexentstring($headrt);
+		say LOGFILE "Missing EntryRef, Check the residue", displaylexentstring($headrt);
 		next;
 		}
 	my $entryrefrt=$rthash{$entryref->getAttribute('guid')};
 	say STDERR "Before:" if $debug;
 	say STDERR $entryrefrt if $debug;
 	my ($cmpntlexemesnode) = $entryrefrt->findnodes('./ComponentLexemes');
+	if (!$cmpntlexemesnode) {
+		say LOGFILE "Error: Complex entry has no pre-existing Components: ", displaylexentstring($headrt);
+		next;}
 	if ($cmpntlexemesnode->findnodes(q#'./objsur[@guid="# . $cmpntguid . q#]'#) ) {
-		say LOGFILE "<!--  Component guid $cmpntguid  already in Components list under" .
-			displaylexentstring($headrt) . " -->";
+		say LOGFILE "Error: Component guid $cmpntguid  already in Components list under" .
+			displaylexentstring($headrt);
 		next;
 		}
 	my $newnode = $cmpntnode->cloneNode(1);
@@ -149,17 +155,15 @@ foreach my $mbr (@mbrs) {
 	say STDERR $entryrefrt if $debug;
 	say STDERR "" if $debug;
 
-	say LOGFILE q#<pair guid="#, $mbr->getAttribute('guid'), q#" entry1id=#;
+#	say LOGFILE q#<pair guid="#, $mbr->getAttribute('guid'), q#" entry1id=#;
 
 	$mbrcnt++;
 	last if ($mbrcnt > 30) && $debug;
 	}
 
 # footer of log
-say LOGFILE q#<!--  DON'T EDIT ANYTHING BELOW THIS LINE -->#;
-say LOGFILE '</pairs>';
 
-say STDERR "Found $mbrcnt of $mbrtotal";
+say LOGFILE "Found $mbrcnt of $mbrtotal";
 my $xmlstring = $fwdatatree->toString;
 # Some miscellaneous Tidying differences
 $xmlstring =~ s#><#>\n<#g;
