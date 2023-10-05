@@ -163,7 +163,7 @@ foreach my $mbr (@mbrs) {
 #	say LOGFILE q#<pair guid="#, $mbr->getAttribute('guid'), q#" entry1id=#;
 
 	$mbrcnt++;
-	last if ($mbrcnt > 30) && $debug;
+#	last if ($mbrcnt > 30) && $debug;
 	}
 
 # footer of log
