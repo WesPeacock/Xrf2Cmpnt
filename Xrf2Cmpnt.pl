@@ -148,9 +148,14 @@ foreach my $mbr (@mbrs) {
 	$cmpntlexemesnode->addChild($newnode);
 	say STDERR  "ComponentLexemes:", $cmpntlexemesnode if $debug; # add the component lexeme as a child node to this one.
 	my ($formsinnode) = $entryrefrt->findnodes('./ShowComplexFormsIn');
-	say STDERR "ShowComplexFormsIn", $formsinnode if $debug; # add the component lexeme as a child node to this one.
-	$newnode = $cmpntnode->cloneNode(1);
-	$formsinnode->addChild($newnode);
+	if (!$formsinnode) {
+		say LOGFILE "Complex entry has no ShowComplexFormsIn node: ", displaylexentstring($headrt);
+		}
+	else {
+		say STDERR "ShowComplexFormsIn", $formsinnode if $debug; # add the component lexeme as a child node to this one.
+		$newnode = $cmpntnode->cloneNode(1);
+		$formsinnode->addChild($newnode);
+		}
 	say STDERR "After:" if $debug;
 	say STDERR $entryrefrt if $debug;
 	say STDERR "" if $debug;
