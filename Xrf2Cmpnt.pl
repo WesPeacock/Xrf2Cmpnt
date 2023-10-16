@@ -49,11 +49,6 @@ I'm quitting" if -f $lockfile ;
 
 open(LOGFILE, '>:encoding(UTF-8)', "$logfilename");
 
-=pod
-# Log file looks like: ????
-# <?xml version="1.0" encoding="UTF-8" ?>
-
-=cut
 
 say "config:". Dumper($config) if $checkini;
 
