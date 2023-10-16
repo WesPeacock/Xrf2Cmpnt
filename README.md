@@ -2,11 +2,11 @@
 
 ### Introduction
 
-This repo contains scripts to convert a FLEx that has Lexical References from a Complex form to the entries that will be its components. It reads the Lexical Reference links and makes the entries to be components of the referred entry.
+This repo contains scripts to convert a FLEx that has Lexical References from a Complex form to the entries that will be its components. It reads the Lexical Reference links and makes the entries and senses to be components of the referred entry.
 
 The FLEx SFM import process allows only one component per complex form. This allows you to import multiple components.
 
-The first component of the SFM complex form will be imported as a regular component. Second and subsequent should be imported as special lexical references.
+The first component of the SFM complex form will be imported as a regular component. Second and subsequent should be imported as special lexical references. Those references are converted to Components. The type of component is determined by the first reference.
 
 Note that if the crossref is at the sense level, FLEx calls it a Lexical Reference. In this document I'll just call it a crossref, whether it's at the sense level or at the entry level.
 
